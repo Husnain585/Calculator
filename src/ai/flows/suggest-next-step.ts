@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 /**
  * @fileOverview Generates a contextual next-step suggestion after a user uses a calculator.
@@ -8,12 +8,10 @@
  * - SuggestNextStepOutput - The return type for the suggestNextStep function.
  */
 
-import { ai } from "@/ai/genkit";
-import { z } from "genkit";
-import { range } from "mathjs";
-import { number, optional } from "zod";
+import {ai} from '@/ai/genkit';
+import {z} from 'genkit';
 
-export const SuggestNextStepInputSchema = z.object({
+const SuggestNextStepInputSchema = z.object({
   calculatorName: z
     .string()
     .describe("The name of the calculator the user has just used."),
@@ -329,7 +327,7 @@ const SuggestNextStepOutputSchema = z.object({
   suggestion: z
     .string()
     .describe(
-      "A helpful, concise, two-line suggestion for the user. This could be a tip or a recommendation for another relevant calculator."
+      'A helpful, concise, two-line suggestion for the user. This could be a tip or a recommendation for another relevant calculator.'
     ),
 });
 export type SuggestNextStepOutput = z.infer<typeof SuggestNextStepOutputSchema>;
@@ -341,9 +339,9 @@ export async function suggestNextStep(
 }
 
 const prompt = ai.definePrompt({
-  name: "suggestNextStepPrompt",
-  input: { schema: SuggestNextStepInputSchema },
-  output: { schema: SuggestNextStepOutputSchema },
+  name: 'suggestNextStepPrompt',
+  input: {schema: SuggestNextStepInputSchema},
+  output: {schema: SuggestNextStepOutputSchema},
   prompt: `A user just finished using the "{{calculatorName}}".
 
   Provide a helpful and concise two-line suggestion for their next step. This could be a practical tip related to their result, or a recommendation for another relevant calculator in the app.
@@ -353,12 +351,12 @@ const prompt = ai.definePrompt({
 
 const suggestNextStepFlow = ai.defineFlow(
   {
-    name: "suggestNextStepFlow",
+    name: 'suggestNextStepFlow',
     inputSchema: SuggestNextStepInputSchema,
     outputSchema: SuggestNextStepOutputSchema,
   },
-  async (input) => {
-    const { output } = await prompt(input);
+  async input => {
+    const {output} = await prompt(input);
     return output!;
   }
 );
