@@ -1,24 +1,41 @@
-import { NextResponse } from "next/server";
-import * as admin from "firebase-admin";
+import { NextRequest, NextResponse } from 'next/server';
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID!,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, "\n"),
-    }),
-  });
-}
+// This tells Next.js NOT to pre-render this route at build time
+export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request) {
-  const { uid } = await req.json();
-
+export async function POST(request: NextRequest) {
   try {
-    await admin.auth().setCustomUserClaims(uid, { admin: true });
+    // Lazy import Firebase Admin (only loads at runtime)
+    const { adminAuth, adminDB } = await import('@/lib/firebase-admin');
+    
+    const { uid, isAdmin } = await request.json();
 
-    return NextResponse.json({ success: true });
+    if (!uid || typeof isAdmin !== 'boolean') {
+      return NextResponse.json(
+        { error: 'uid and isAdmin are required' },
+        { status: 400 }
+      );
+    }
+
+    // Set custom claims
+    await adminAuth.setCustomUserClaims(uid, { admin: isAdmin });
+
+    // Update Firestore
+    await adminDB.collection('users').doc(uid).set(
+      { isAdmin },
+      { merge: true }
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: `User ${uid} admin status set to ${isAdmin}`
+    });
+
   } catch (error) {
-    return NextResponse.json({ error }, { status: 500 });
+    console.error('Error setting admin status:', error);
+    return NextResponse.json(
+      { error: 'Failed to set admin status' },
+      { status: 500 }
+    );
   }
 }

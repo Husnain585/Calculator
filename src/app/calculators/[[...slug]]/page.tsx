@@ -19,6 +19,7 @@ import {
 import { ArrowRight } from 'lucide-react';
 import { calculatorIcons } from '@/lib/calculator-icons';
 
+
 export default async function CalculatorPage({
   params,
 }: {

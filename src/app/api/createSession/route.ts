@@ -1,5 +1,10 @@
 // app/api/createSession/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+// Add at the top of EVERY route.ts that uses Firebase Admin
+export const dynamic = 'force-dynamic';
+
+// Use dynamic import
+const { adminAuth, adminDB } = await import('@/lib/firebase-admin');
 
 export async function POST(request: NextRequest) {
   try {
