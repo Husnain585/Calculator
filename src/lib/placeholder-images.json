@@ -1,0 +1,46 @@
+{
+  "placeholderImages": [
+    {
+      "id": "finance",
+      "description": "A visual representation of financial charts and graphs.",
+      "imageUrl": "https://images.unsplash.com/photo-1734856080638-71e78b3d8d5f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtb25leSUyMGNoYXJ0c3xlbnwwfHx8fDE3NjIzNjgxMzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "money charts"
+    },
+    {
+      "id": "health",
+      "description": "An apple and a stethoscope representing health.",
+      "imageUrl": "https://images.unsplash.com/photo-1633219664572-473fd988a44f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxoZWFsdGglMjBtZWRpY2FsfGVufDB8fHx8MTc2MjI3NTY4Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "health medical"
+    },
+    {
+      "id": "math",
+      "description": "A chalkboard with complex math equations written on it.",
+      "imageUrl": "https://images.unsplash.com/photo-1581089784209-f2e9b2e20d3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtYXRoZW1hdGljcyUyMGVxdWF0aW9uc3xlbnwwfHx8fDE3NjIyODkxMjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mathematics equations"
+    },
+    {
+      "id": "fitness",
+      "description": "A set of dumbbells on the floor of a gym.",
+      "imageUrl": "https://images.unsplash.com/photo-1606889464198-fcb18894cf50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxneW0lMjB3b3Jrb3V0fGVufDB8fHx8MTc2MjMzMjE0NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gym workout"
+    },
+    {
+      "id": "construction",
+      "description": "A construction site with cranes and buildings under development.",
+      "imageUrl": "https://images.unsplash.com/photo-1531834685032-c34bf0d84c77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb25zdHJ1Y3Rpb24lMjBzaXRlfGVufDB8fHx8MTc2MjI2MTc2NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "construction site"
+    },
+    {
+      "id": "utilities",
+      "description": "A collection of various tools on a workbench.",
+      "imageUrl": "https://images.unsplash.com/photo-1706864722761-10ef36a0d6e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxhYnN0cmFjdCUyMHRvb2xzfGVufDB8fHx8MTc2MjM2ODEzOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract tools"
+    },
+    {
+      "id": "other",
+      "description": "A collection of various tools on a workbench.",
+      "imageUrl": "https://images.unsplash.com/photo-1706864722761-10ef36a0d6e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxhYnN0cmFjdCUyMHRvb2xzfGVufDB8fHx8MTc2MjM2ODEzOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract tools"
+    }
+  ]
+}

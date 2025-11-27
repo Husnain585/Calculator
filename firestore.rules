@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if the user is an admin
+    // Note: This relies on a custom claim 'admin' set on the user's auth token.
+    // If you haven't set up custom claims yet, you might need a temporary alternative
+    // like checking a specific email address or a field in the users collection.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // User profiles: Users can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Admins can read/write all user profiles
+      allow read, write: if isAdmin();
+    }
+
+    // Global Settings: Public read, Admin write
+    match /settings/global {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Calculators: Public read, Admin write
+    match /calculators/{calculatorId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Default deny for everything else
+    match /{document=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}
