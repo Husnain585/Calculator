@@ -1,25 +1,62 @@
 "use client";
 
-import { useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calculator, Lightbulb,  History, Ruler, Scale, Thermometer, Zap, Clock, Droplets } from 'lucide-react';
-import { suggestNextStep } from '@/ai/flows/suggest-next-step';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Calculator,
+  Lightbulb,
+  History,
+  Ruler,
+  Scale,
+  Thermometer,
+  Zap,
+  Clock,
+  Droplets,
+} from "lucide-react";
+import { suggestNextStep } from "@/ai/flows/suggest-next-step";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
-  category: z.enum(['length', 'weight', 'temperature', 'volume', 'time', 'energy']),
-  fromUnit: z.string().min(1, 'Please select a unit'),
-  toUnit: z.string().min(1, 'Please select a unit'),
-  value: z.coerce.number().min(0, 'Value must be positive'),
+  category: z.enum([
+    "length",
+    "weight",
+    "temperature",
+    "volume",
+    "time",
+    "energy",
+  ]),
+  fromUnit: z.string().min(1, "Please select a unit"),
+  toUnit: z.string().min(1, "Please select a unit"),
+  value: z.coerce.number().min(0, "Value must be positive"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -42,7 +79,16 @@ type ConversionHistory = {
 // Conversion factors and units
 const CONVERSION_DATA = {
   length: {
-    units: ['meters', 'kilometers', 'centimeters', 'millimeters', 'miles', 'yards', 'feet', 'inches'],
+    units: [
+      "meters",
+      "kilometers",
+      "centimeters",
+      "millimeters",
+      "miles",
+      "yards",
+      "feet",
+      "inches",
+    ],
     conversions: {
       meters: 1,
       kilometers: 0.001,
@@ -56,7 +102,7 @@ const CONVERSION_DATA = {
     icon: Ruler,
   },
   weight: {
-    units: ['kilograms', 'grams', 'milligrams', 'pounds', 'ounces', 'stones'],
+    units: ["kilograms", "grams", "milligrams", "pounds", "ounces", "stones"],
     conversions: {
       kilograms: 1,
       grams: 1000,
@@ -68,7 +114,7 @@ const CONVERSION_DATA = {
     icon: Scale,
   },
   temperature: {
-    units: ['celsius', 'fahrenheit', 'kelvin'],
+    units: ["celsius", "fahrenheit", "kelvin"],
     conversions: {
       celsius: 1,
       fahrenheit: 1,
@@ -77,7 +123,15 @@ const CONVERSION_DATA = {
     icon: Thermometer,
   },
   volume: {
-    units: ['liters', 'milliliters', 'gallons', 'quarts', 'pints', 'cups', 'fluid-ounces'],
+    units: [
+      "liters",
+      "milliliters",
+      "gallons",
+      "quarts",
+      "pints",
+      "cups",
+      "fluid-ounces",
+    ],
     conversions: {
       liters: 1,
       milliliters: 1000,
@@ -85,25 +139,32 @@ const CONVERSION_DATA = {
       quarts: 1.05669,
       pints: 2.11338,
       cups: 4.22675,
-      'fluid-ounces': 33.814,
+      "fluid-ounces": 33.814,
     },
     icon: Droplets,
   },
   time: {
-    units: ['seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'],
+    units: ["seconds", "minutes", "hours", "days", "weeks", "months", "years"],
     conversions: {
       seconds: 1,
-      minutes: 1/60,
-      hours: 1/3600,
-      days: 1/86400,
-      weeks: 1/604800,
-      months: 1/2592000,
-      years: 1/31536000,
+      minutes: 1 / 60,
+      hours: 1 / 3600,
+      days: 1 / 86400,
+      weeks: 1 / 604800,
+      months: 1 / 2592000,
+      years: 1 / 31536000,
     },
     icon: Clock,
   },
   energy: {
-    units: ['joules', 'kilojoules', 'calories', 'kilocalories', 'watthours', 'kilowatthours'],
+    units: [
+      "joules",
+      "kilojoules",
+      "calories",
+      "kilocalories",
+      "watthours",
+      "kilowatthours",
+    ],
     conversions: {
       joules: 1,
       kilojoules: 0.001,
@@ -118,46 +179,54 @@ const CONVERSION_DATA = {
 
 export default function ConversionCalculator() {
   const [result, setResult] = useState<ConversionResult | null>(null);
-  const [suggestion, setSuggestion] = useState('');
+  const [suggestion, setSuggestion] = useState("");
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [history, setHistory] = useState<ConversionHistory[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      category: 'length',
-      fromUnit: 'meters',
-      toUnit: 'feet',
+      category: "length",
+      fromUnit: "meters",
+      toUnit: "feet",
       value: 1,
     },
   });
 
-  const watchCategory = form.watch('category');
-  const watchFromUnit = form.watch('fromUnit');
-  const watchToUnit = form.watch('toUnit');
-  const watchValue = form.watch('value');
+  const watchCategory = form.watch("category");
+  const watchFromUnit = form.watch("fromUnit");
+  const watchToUnit = form.watch("toUnit");
+  const watchValue = form.watch("value");
 
   // Get available units for current category
   const availableUnits = CONVERSION_DATA[watchCategory]?.units || [];
 
   const convertValue = (data: FormValues): ConversionResult => {
     const { category, fromUnit, toUnit, value } = data;
-    
-    if (category === 'temperature') {
+
+    if (category === "temperature") {
       return convertTemperature(value, fromUnit, toUnit);
     }
 
     // For other categories, use conversion factors
-    const fromFactor = CONVERSION_DATA[category].conversions[fromUnit];
-    const toFactor = CONVERSION_DATA[category].conversions[toUnit];
-    
+    const categoryData = CONVERSION_DATA[category];
+    const conversions = categoryData.conversions;
+
+    const fromFactor = conversions[fromUnit as keyof typeof conversions];
+    const toFactor = conversions[toUnit as keyof typeof conversions];
+
     const baseValue = value / fromFactor;
     const convertedValue = baseValue * toFactor;
 
     // Determine appropriate precision
-    const precision = Math.abs(convertedValue) < 0.01 ? 6 : 
-                     Math.abs(convertedValue) < 1 ? 4 : 
-                     Math.abs(convertedValue) < 1000 ? 2 : 0;
+    const precision =
+      Math.abs(convertedValue) < 0.01
+        ? 6
+        : Math.abs(convertedValue) < 1
+        ? 4
+        : Math.abs(convertedValue) < 1000
+        ? 2
+        : 0;
 
     return {
       convertedValue,
@@ -166,21 +235,25 @@ export default function ConversionCalculator() {
     };
   };
 
-  const convertTemperature = (value: number, fromUnit: string, toUnit: string): ConversionResult => {
+  const convertTemperature = (
+    value: number,
+    fromUnit: string,
+    toUnit: string
+  ): ConversionResult => {
     let convertedValue: number;
-    let formula = '';
+    let formula = "";
 
     // Convert to Celsius first
     let celsius: number;
     switch (fromUnit) {
-      case 'celsius':
+      case "celsius":
         celsius = value;
         break;
-      case 'fahrenheit':
-        celsius = (value - 32) * 5/9;
+      case "fahrenheit":
+        celsius = ((value - 32) * 5) / 9;
         formula = `(${value}°F - 32) × 5/9`;
         break;
-      case 'kelvin':
+      case "kelvin":
         celsius = value - 273.15;
         formula = `${value}K - 273.15`;
         break;
@@ -190,14 +263,16 @@ export default function ConversionCalculator() {
 
     // Convert from Celsius to target unit
     switch (toUnit) {
-      case 'celsius':
+      case "celsius":
         convertedValue = celsius;
         break;
-      case 'fahrenheit':
-        convertedValue = (celsius * 9/5) + 32;
-        formula = formula ? `(${formula}) × 9/5 + 32` : `(${value}°C × 9/5) + 32`;
+      case "fahrenheit":
+        convertedValue = (celsius * 9) / 5 + 32;
+        formula = formula
+          ? `(${formula}) × 9/5 + 32`
+          : `(${value}°C × 9/5) + 32`;
         break;
-      case 'kelvin':
+      case "kelvin":
         convertedValue = celsius + 273.15;
         formula = formula ? `${formula} + 273.15` : `${value}°C + 273.15`;
         break;
@@ -225,19 +300,21 @@ export default function ConversionCalculator() {
       category: data.category,
       timestamp: new Date(),
     };
-    setHistory(prev => [historyItem, ...prev.slice(0, 5)]);
+    setHistory((prev) => [historyItem, ...prev.slice(0, 5)]);
 
     setSuggestionLoading(true);
-    setSuggestion('');
+    setSuggestion("");
     try {
-      const res = await suggestNextStep({ 
-        calculatorName: 'Conversion Calculator',
-        inputs: data
+      const res = await suggestNextStep({
+        calculatorName: "Conversion Calculator",
+        inputs: data,
       });
       setSuggestion(res.suggestion);
     } catch (error) {
-      console.error('Failed to get AI suggestion:', error);
-      setSuggestion("Use common conversion factors for quick mental math. Remember that 1 inch = 2.54 cm, 1 kg = 2.2 lbs, and 1 liter = 0.264 gallons for quick estimates.");
+      console.error("Failed to get AI suggestion:", error);
+      setSuggestion(
+        "Use common conversion factors for quick mental math. Remember that 1 inch = 2.54 cm, 1 kg = 2.2 lbs, and 1 liter = 0.264 gallons for quick estimates."
+      );
     } finally {
       setSuggestionLoading(false);
     }
@@ -245,21 +322,21 @@ export default function ConversionCalculator() {
 
   const resetCalculator = () => {
     form.reset({
-      category: 'length',
-      fromUnit: 'meters',
-      toUnit: 'feet',
+      category: "length",
+      fromUnit: "meters",
+      toUnit: "feet",
       value: 1,
     });
     setResult(null);
-    setSuggestion('');
+    setSuggestion("");
   };
 
   const swapUnits = () => {
-    const currentFrom = form.getValues('fromUnit');
-    const currentTo = form.getValues('toUnit');
-    form.setValue('fromUnit', currentTo);
-    form.setValue('toUnit', currentFrom);
-    
+    const currentFrom = form.getValues("fromUnit");
+    const currentTo = form.getValues("toUnit");
+    form.setValue("fromUnit", currentTo);
+    form.setValue("toUnit", currentFrom);
+
     // Recalculate if we have a result
     if (result) {
       const currentData = form.getValues();
@@ -268,12 +345,34 @@ export default function ConversionCalculator() {
     }
   };
 
-  const applyQuickConversion = (preset: 'height' | 'weight' | 'cooking' | 'travel') => {
+  const applyQuickConversion = (
+    preset: "height" | "weight" | "cooking" | "travel"
+  ) => {
     const presets = {
-      height: { category: 'length' as const, fromUnit: 'feet', toUnit: 'meters', value: 6 },
-      weight: { category: 'weight' as const, fromUnit: 'pounds', toUnit: 'kilograms', value: 150 },
-      cooking: { category: 'volume' as const, fromUnit: 'cups', toUnit: 'milliliters', value: 2 },
-      travel: { category: 'length' as const, fromUnit: 'miles', toUnit: 'kilometers', value: 60 },
+      height: {
+        category: "length" as const,
+        fromUnit: "feet",
+        toUnit: "meters",
+        value: 6,
+      },
+      weight: {
+        category: "weight" as const,
+        fromUnit: "pounds",
+        toUnit: "kilograms",
+        value: 150,
+      },
+      cooking: {
+        category: "volume" as const,
+        fromUnit: "cups",
+        toUnit: "milliliters",
+        value: 2,
+      },
+      travel: {
+        category: "length" as const,
+        fromUnit: "miles",
+        toUnit: "kilometers",
+        value: 60,
+      },
     };
     form.reset({ ...form.getValues(), ...presets[preset] });
   };
@@ -292,7 +391,8 @@ export default function ConversionCalculator() {
                   <CardTitle>Universal Converter</CardTitle>
                 </div>
                 <CardDescription>
-                  Convert between different units of measurement across multiple categories.
+                  Convert between different units of measurement across multiple
+                  categories.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -300,16 +400,36 @@ export default function ConversionCalculator() {
                 <div className="space-y-3">
                   <FormLabel className="text-base">Quick Conversions</FormLabel>
                   <div className="flex flex-wrap gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={() => applyQuickConversion('height')}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => applyQuickConversion("height")}
+                    >
                       📏 Height
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => applyQuickConversion('weight')}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => applyQuickConversion("weight")}
+                    >
                       ⚖️ Weight
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => applyQuickConversion('cooking')}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => applyQuickConversion("cooking")}
+                    >
                       🍳 Cooking
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => applyQuickConversion('travel')}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => applyQuickConversion("travel")}
+                    >
                       🚗 Travel
                     </Button>
                   </div>
@@ -322,13 +442,19 @@ export default function ConversionCalculator() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Category</FormLabel>
-                        <Select onValueChange={(value) => {
-                          field.onChange(value);
-                          // Reset to default units for new category
-                          const newUnits = CONVERSION_DATA[value as keyof typeof CONVERSION_DATA].units;
-                          form.setValue('fromUnit', newUnits[0]);
-                          form.setValue('toUnit', newUnits[1] || newUnits[0]);
-                        }} defaultValue={field.value}>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            // Reset to default units for new category
+                            const newUnits =
+                              CONVERSION_DATA[
+                                value as keyof typeof CONVERSION_DATA
+                              ].units;
+                            form.setValue("fromUnit", newUnits[0]);
+                            form.setValue("toUnit", newUnits[1] || newUnits[0]);
+                          }}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue />
@@ -337,7 +463,9 @@ export default function ConversionCalculator() {
                           <SelectContent>
                             <SelectItem value="length">Length</SelectItem>
                             <SelectItem value="weight">Weight/Mass</SelectItem>
-                            <SelectItem value="temperature">Temperature</SelectItem>
+                            <SelectItem value="temperature">
+                              Temperature
+                            </SelectItem>
                             <SelectItem value="volume">Volume</SelectItem>
                             <SelectItem value="time">Time</SelectItem>
                             <SelectItem value="energy">Energy</SelectItem>
@@ -373,14 +501,17 @@ export default function ConversionCalculator() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>From Unit</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {availableUnits.map(unit => (
+                            {availableUnits.map((unit) => (
                               <SelectItem key={unit} value={unit}>
                                 {unit.charAt(0).toUpperCase() + unit.slice(1)}
                               </SelectItem>
@@ -391,7 +522,7 @@ export default function ConversionCalculator() {
                       </FormItem>
                     )}
                   />
-                  
+
                   {/* Swap Button */}
                   <div className="flex justify-center py-2">
                     <Button
@@ -400,8 +531,7 @@ export default function ConversionCalculator() {
                       size="icon"
                       onClick={swapUnits}
                       className="rounded-full"
-                    >
-                    </Button>
+                    ></Button>
                   </div>
 
                   <FormField
@@ -410,14 +540,17 @@ export default function ConversionCalculator() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>To Unit</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {availableUnits.map(unit => (
+                            {availableUnits.map((unit) => (
                               <SelectItem key={unit} value={unit}>
                                 {unit.charAt(0).toUpperCase() + unit.slice(1)}
                               </SelectItem>
@@ -432,19 +565,33 @@ export default function ConversionCalculator() {
 
                 {/* Common Conversions Preview */}
                 <div className="pt-4 border-t">
-                  <FormLabel className="text-base">Common {watchCategory.charAt(0).toUpperCase() + watchCategory.slice(1)} Conversions</FormLabel>
+                  <FormLabel className="text-base">
+                    Common{" "}
+                    {watchCategory.charAt(0).toUpperCase() +
+                      watchCategory.slice(1)}{" "}
+                    Conversions
+                  </FormLabel>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
                     {getCommonConversions(watchCategory).map((conv, index) => (
-                      <div key={index} className="text-center p-2 border rounded-lg text-xs">
+                      <div
+                        key={index}
+                        className="text-center p-2 border rounded-lg text-xs"
+                      >
                         <p className="font-medium">1 {conv.from}</p>
-                        <p className="text-muted-foreground">= {conv.value} {conv.to}</p>
+                        <p className="text-muted-foreground">
+                          = {conv.value} {conv.to}
+                        </p>
                       </div>
                     ))}
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button type="button" variant="outline" onClick={resetCalculator}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={resetCalculator}
+                >
                   Reset
                 </Button>
                 <Button type="submit">
@@ -464,12 +611,17 @@ export default function ConversionCalculator() {
                 <History className="h-5 w-5 text-primary" />
                 <CardTitle>Recent Conversions</CardTitle>
               </div>
-              <CardDescription>Your last {history.length} conversions</CardDescription>
+              <CardDescription>
+                Your last {history.length} conversions
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {history.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div className="flex items-center gap-3">
                       <CategoryIcon className="h-4 w-4 text-muted-foreground" />
                       <div>
@@ -503,7 +655,8 @@ export default function ConversionCalculator() {
           <CardHeader>
             <CardTitle>Conversion Result</CardTitle>
             <CardDescription>
-              {watchCategory.charAt(0).toUpperCase() + watchCategory.slice(1)} Conversion
+              {watchCategory.charAt(0).toUpperCase() + watchCategory.slice(1)}{" "}
+              Conversion
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 p-6">
@@ -515,14 +668,18 @@ export default function ConversionCalculator() {
                       {watchValue} {watchFromUnit}
                     </span>
                     <span className="font-semibold text-primary">
-                      {result.convertedValue.toFixed(result.precision)} {watchToUnit}
+                      {result.convertedValue.toFixed(result.precision)}{" "}
+                      {watchToUnit}
                     </span>
                   </div>
-                  
+
                   {/* Conversion Formula */}
                   <div className="bg-muted p-3 rounded-lg">
                     <p className="text-sm font-mono text-center">
-                      {result.formula || `${watchValue} ${watchFromUnit} → ${result.convertedValue.toFixed(result.precision)} ${watchToUnit}`}
+                      {result.formula ||
+                        `${watchValue} ${watchFromUnit} → ${result.convertedValue.toFixed(
+                          result.precision
+                        )} ${watchToUnit}`}
                     </p>
                   </div>
                 </div>
@@ -533,35 +690,45 @@ export default function ConversionCalculator() {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="text-center p-2 border rounded">
                       <p className="text-muted-foreground">×2</p>
-                      <p className="font-semibold">{(result.convertedValue * 2).toFixed(result.precision)}</p>
+                      <p className="font-semibold">
+                        {(result.convertedValue * 2).toFixed(result.precision)}
+                      </p>
                     </div>
                     <div className="text-center p-2 border rounded">
                       <p className="text-muted-foreground">×5</p>
-                      <p className="font-semibold">{(result.convertedValue * 5).toFixed(result.precision)}</p>
+                      <p className="font-semibold">
+                        {(result.convertedValue * 5).toFixed(result.precision)}
+                      </p>
                     </div>
                     <div className="text-center p-2 border rounded">
                       <p className="text-muted-foreground">×10</p>
-                      <p className="font-semibold">{(result.convertedValue * 10).toFixed(result.precision)}</p>
+                      <p className="font-semibold">
+                        {(result.convertedValue * 10).toFixed(result.precision)}
+                      </p>
                     </div>
                     <div className="text-center p-2 border rounded">
                       <p className="text-muted-foreground">÷2</p>
-                      <p className="font-semibold">{(result.convertedValue / 2).toFixed(result.precision)}</p>
+                      <p className="font-semibold">
+                        {(result.convertedValue / 2).toFixed(result.precision)}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Category-specific tips */}
-                {watchCategory === 'temperature' && (
+                {watchCategory === "temperature" && (
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <p className="text-sm text-blue-800 text-center">
-                      💡 <strong>Quick tip:</strong> °F to °C: Subtract 32, then multiply by 5/9
+                      💡 <strong>Quick tip:</strong> °F to °C: Subtract 32, then
+                      multiply by 5/9
                     </p>
                   </div>
                 )}
-                {watchCategory === 'length' && (
+                {watchCategory === "length" && (
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <p className="text-sm text-blue-800 text-center">
-                      📏 <strong>Remember:</strong> 1 inch = 2.54 cm, 1 foot = 0.3048 m
+                      📏 <strong>Remember:</strong> 1 inch = 2.54 cm, 1 foot =
+                      0.3048 m
                     </p>
                   </div>
                 )}
@@ -570,7 +737,9 @@ export default function ConversionCalculator() {
               <div className="text-center space-y-4 py-8">
                 <CategoryIcon className="h-12 w-12 text-muted-foreground mx-auto" />
                 <div>
-                  <p className="text-muted-foreground mb-2">Enter values to see</p>
+                  <p className="text-muted-foreground mb-2">
+                    Enter values to see
+                  </p>
                   <p className="font-semibold">Conversion Result</p>
                 </div>
               </div>
@@ -615,7 +784,7 @@ export default function ConversionCalculator() {
               Quick Tips
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="systems" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
@@ -623,8 +792,10 @@ export default function ConversionCalculator() {
                   <div>
                     <h4 className="font-semibold mb-2">Measurement Systems</h4>
                     <p className="text-sm text-muted-foreground">
-                      The world primarily uses two measurement systems: Metric (International System of Units) 
-                      and Imperial (US Customary Units). Understanding both is essential for global communication.
+                      The world primarily uses two measurement systems: Metric
+                      (International System of Units) and Imperial (US Customary
+                      Units). Understanding both is essential for global
+                      communication.
                     </p>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
@@ -634,7 +805,10 @@ export default function ConversionCalculator() {
                         <li>• Used by most countries worldwide</li>
                         <li>• Base-10 system for easy conversions</li>
                         <li>• Standard units: meter, kilogram, liter</li>
-                        <li>• Prefixes: kilo- (1000), centi- (0.01), milli- (0.001)</li>
+                        <li>
+                          • Prefixes: kilo- (1000), centi- (0.01), milli-
+                          (0.001)
+                        </li>
                         <li>• Temperature in Celsius or Kelvin</li>
                       </ul>
                     </div>
@@ -642,10 +816,14 @@ export default function ConversionCalculator() {
                       <h4 className="font-semibold mb-2">Imperial System</h4>
                       <ul className="text-sm text-muted-foreground space-y-2">
                         <li>• Primarily used in the United States</li>
-                        <li>• Historical system with varied conversion factors</li>
+                        <li>
+                          • Historical system with varied conversion factors
+                        </li>
                         <li>• Common units: feet, pounds, gallons</li>
                         <li>• Temperature in Fahrenheit</li>
-                        <li>• Based on historical precedents rather than decimals</li>
+                        <li>
+                          • Based on historical precedents rather than decimals
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -653,29 +831,43 @@ export default function ConversionCalculator() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="formulas" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <h4 className="font-semibold">Common Conversion Formulas</h4>
+                    <h4 className="font-semibold">
+                      Common Conversion Formulas
+                    </h4>
                     <ul className="text-sm text-muted-foreground space-y-3">
                       <li className="flex items-start gap-2">
                         <div className="h-2 w-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
-                        <span><strong>Length:</strong> 1 inch = 2.54 cm, 1 mile = 1.609 km</span>
+                        <span>
+                          <strong>Length:</strong> 1 inch = 2.54 cm, 1 mile =
+                          1.609 km
+                        </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <div className="h-2 w-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
-                        <span><strong>Weight:</strong> 1 pound = 0.454 kg, 1 ounce = 28.35 g</span>
+                        <span>
+                          <strong>Weight:</strong> 1 pound = 0.454 kg, 1 ounce =
+                          28.35 g
+                        </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <div className="h-2 w-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
-                        <span><strong>Volume:</strong> 1 gallon = 3.785 liters, 1 cup = 236.6 ml</span>
+                        <span>
+                          <strong>Volume:</strong> 1 gallon = 3.785 liters, 1
+                          cup = 236.6 ml
+                        </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <div className="h-2 w-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
-                        <span><strong>Temperature:</strong> °C = (°F - 32) × 5/9, K = °C + 273.15</span>
+                        <span>
+                          <strong>Temperature:</strong> °C = (°F - 32) × 5/9, K
+                          = °C + 273.15
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -684,19 +876,30 @@ export default function ConversionCalculator() {
                     <ul className="text-sm text-muted-foreground space-y-3">
                       <li className="flex items-start gap-2">
                         <div className="h-2 w-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
-                        <span><strong>Km to Miles:</strong> Multiply by 0.6 (roughly 3/5)</span>
+                        <span>
+                          <strong>Km to Miles:</strong> Multiply by 0.6 (roughly
+                          3/5)
+                        </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <div className="h-2 w-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
-                        <span><strong>Kg to Pounds:</strong> Multiply by 2.2</span>
+                        <span>
+                          <strong>Kg to Pounds:</strong> Multiply by 2.2
+                        </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <div className="h-2 w-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
-                        <span><strong>Liters to Gallons:</strong> Divide by 4 (rough estimate)</span>
+                        <span>
+                          <strong>Liters to Gallons:</strong> Divide by 4 (rough
+                          estimate)
+                        </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <div className="h-2 w-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
-                        <span><strong>°C to °F:</strong> Double and add 30 (approximate)</span>
+                        <span>
+                          <strong>°C to °F:</strong> Double and add 30
+                          (approximate)
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -704,21 +907,26 @@ export default function ConversionCalculator() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="tips" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-semibold mb-2">Effective Conversion Strategies</h4>
+                    <h4 className="font-semibold mb-2">
+                      Effective Conversion Strategies
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      Mastering unit conversions requires both memorization of key relationships 
-                      and understanding of practical estimation techniques.
+                      Mastering unit conversions requires both memorization of
+                      key relationships and understanding of practical
+                      estimation techniques.
                     </p>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold mb-2">Estimation Techniques</h4>
+                      <h4 className="font-semibold mb-2">
+                        Estimation Techniques
+                      </h4>
                       <ul className="text-sm text-muted-foreground space-y-2">
                         <li>• Use 2.2 for kg to lbs (actual: 2.20462)</li>
                         <li>• Use 1.6 for miles to km (actual: 1.60934)</li>
@@ -728,7 +936,9 @@ export default function ConversionCalculator() {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">Practical Applications</h4>
+                      <h4 className="font-semibold mb-2">
+                        Practical Applications
+                      </h4>
                       <ul className="text-sm text-muted-foreground space-y-2">
                         <li>• Cooking: Memorize cup to ml conversions</li>
                         <li>• Travel: Know km to miles for speed limits</li>
@@ -752,40 +962,40 @@ export default function ConversionCalculator() {
 function getCommonConversions(category: string) {
   const common = {
     length: [
-      { from: 'inch', to: 'cm', value: '2.54' },
-      { from: 'foot', to: 'meters', value: '0.305' },
-      { from: 'mile', to: 'km', value: '1.609' },
-      { from: 'yard', to: 'meters', value: '0.914' },
+      { from: "inch", to: "cm", value: "2.54" },
+      { from: "foot", to: "meters", value: "0.305" },
+      { from: "mile", to: "km", value: "1.609" },
+      { from: "yard", to: "meters", value: "0.914" },
     ],
     weight: [
-      { from: 'pound', to: 'kg', value: '0.454' },
-      { from: 'ounce', to: 'grams', value: '28.35' },
-      { from: 'stone', to: 'kg', value: '6.35' },
-      { from: 'kg', to: 'pounds', value: '2.205' },
+      { from: "pound", to: "kg", value: "0.454" },
+      { from: "ounce", to: "grams", value: "28.35" },
+      { from: "stone", to: "kg", value: "6.35" },
+      { from: "kg", to: "pounds", value: "2.205" },
     ],
     temperature: [
-      { from: '°C', to: '°F', value: '33.8' },
-      { from: '°F', to: '°C', value: '-17.2' },
-      { from: '°C', to: 'K', value: '274.15' },
-      { from: '°F', to: 'K', value: '255.9' },
+      { from: "°C", to: "°F", value: "33.8" },
+      { from: "°F", to: "°C", value: "-17.2" },
+      { from: "°C", to: "K", value: "274.15" },
+      { from: "°F", to: "K", value: "255.9" },
     ],
     volume: [
-      { from: 'gallon', to: 'liters', value: '3.785' },
-      { from: 'cup', to: 'ml', value: '236.6' },
-      { from: 'pint', to: 'ml', value: '473.2' },
-      { from: 'quart', to: 'liters', value: '0.946' },
+      { from: "gallon", to: "liters", value: "3.785" },
+      { from: "cup", to: "ml", value: "236.6" },
+      { from: "pint", to: "ml", value: "473.2" },
+      { from: "quart", to: "liters", value: "0.946" },
     ],
     time: [
-      { from: 'hour', to: 'minutes', value: '60' },
-      { from: 'day', to: 'hours', value: '24' },
-      { from: 'week', to: 'days', value: '7' },
-      { from: 'year', to: 'days', value: '365' },
+      { from: "hour", to: "minutes", value: "60" },
+      { from: "day", to: "hours", value: "24" },
+      { from: "week", to: "days", value: "7" },
+      { from: "year", to: "days", value: "365" },
     ],
     energy: [
-      { from: 'calorie', to: 'joules', value: '4.184' },
-      { from: 'kcal', to: 'kj', value: '4.184' },
-      { from: 'kWh', to: 'joules', value: '3.6M' },
-      { from: 'Wh', to: 'joules', value: '3600' },
+      { from: "calorie", to: "joules", value: "4.184" },
+      { from: "kcal", to: "kj", value: "4.184" },
+      { from: "kWh", to: "joules", value: "3.6M" },
+      { from: "Wh", to: "joules", value: "3600" },
     ],
   };
 

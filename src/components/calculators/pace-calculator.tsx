@@ -150,6 +150,7 @@ export default function PaceCalculator() {
     try {
       const res = await suggestNextStep({ 
         calculatorName: 'Pace Calculator',
+        loanType: 'personal',
         pacePerKm: `${paceMinPerKm}:${paceSecPerKm.toString().padStart(2, '0')}`,
         paceCategory: paceCategoryInfo.category,
         activityType: data.activityType,

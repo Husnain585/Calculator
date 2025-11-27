@@ -95,8 +95,8 @@ export default function SimpleInterestCalculator() {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    const result = calculateSimpleInterest(data);
-    setResult(result);
+    const calculationResult = calculateSimpleInterest(data); // rename to avoid collision
+  setResult(calculationResult);
 
     setSuggestionLoading(true);
     setSuggestion('');
@@ -107,7 +107,7 @@ export default function SimpleInterestCalculator() {
         rate: data.rate,
         time: data.time,
         timeUnit: data.timeUnit,
-        totalInterest: result.interest
+        totalInterest: calculationResult.interest
       });
       setSuggestion(result.suggestion);
     } catch (error) {

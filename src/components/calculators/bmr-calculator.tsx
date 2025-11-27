@@ -350,7 +350,6 @@ export default function BmrCalculator() {
                     {activityLevels.map((level) => (
                       <Badge key={level.value} variant="outline" className="flex flex-col items-center p-2">
                         <span className="font-semibold">{level.label}</span>
-                        <span>×{activityMultipliers[level.value]}</span>
                       </Badge>
                     ))}
                   </div>

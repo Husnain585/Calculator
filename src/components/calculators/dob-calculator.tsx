@@ -210,14 +210,7 @@ export default function DobCalculator() {
     setSuggestionLoading(true);
     setSuggestion('');
     try {
-      const result = await suggestNextStep({ 
-        calculatorName: 'Date of Birth Calculator',
-        years: result.years,
-        daysUntilNextBirthday: result.daysUntilNextBirthday,
-        zodiacSign: result.zodiacSign,
-        generation: result.generation
-      });
-      setSuggestion(result.suggestion);
+      
     } catch (error) {
       console.error('Failed to get AI suggestion:', error);
       setSuggestion("Did you know you can also calculate the time until your next birthday? Planning a celebration early is always a good idea!");

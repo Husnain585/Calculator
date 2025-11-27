@@ -131,7 +131,6 @@ export default function PercentageCalculator() {
       const res = await suggestNextStep({ 
         calculatorName: 'Percentage Calculator',
         calculationType,
-        result: calcResult?.value,
         numericValue: calcResult?.numericValue
       });
       setSuggestion(res.suggestion);

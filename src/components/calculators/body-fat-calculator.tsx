@@ -45,6 +45,8 @@ interface Result {
   leanBodyMass: number;
   fatMass: number;
   idealRange: string;
+  categoryColor: String,
+  categoryDescription: string;
 }
 
 export default function BodyFatCalculator() {

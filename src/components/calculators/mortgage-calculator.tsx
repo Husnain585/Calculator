@@ -171,6 +171,7 @@ export default function MortgageCalculator() {
     try {
       const res = await suggestNextStep({ 
         calculatorName: 'Mortgage Calculator',
+        loanType: "mortgage",
         monthlyPayment,
         totalInterest,
         interestRate,

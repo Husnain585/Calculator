@@ -1,11 +1,18 @@
 "use client";
 
-import { useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,26 +20,48 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Calculator as CalculatorIcon, Lightbulb, Shuffle, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, Copy, AlertTriangle, Info, Sparkles, History } from 'lucide-react';
-import { suggestNextStep } from '@/ai/flows/suggest-next-step';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useToast } from '@/hooks/use-toast';
-import { Slider } from '@/components/ui/slider';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Calculator as CalculatorIcon,
+  Lightbulb,
+  Shuffle,
+  Dice1,
+  Dice2,
+  Dice3,
+  Dice4,
+  Dice5,
+  Dice6,
+  Copy,
+  AlertTriangle,
+  Info,
+  Sparkles,
+  History,
+} from "lucide-react";
+import { suggestNextStep } from "@/ai/flows/suggest-next-step";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { useToast } from "@/hooks/use-toast";
+import { Slider } from "@/components/ui/slider";
 
-const formSchema = z.object({
-  min: z.coerce.number().int('Minimum value must be an integer.'),
-  max: z.coerce.number().int('Maximum value must be an integer.'),
-  count: z.coerce.number().int().min(1).max(100).default(1),
-  allowDuplicates: z.boolean().default(false),
-}).refine(data => data.min < data.max, {
-  message: 'Minimum value must be less than the maximum value.',
-  path: ['min'],
-});
+const formSchema = z
+  .object({
+    min: z.coerce.number().int("Minimum value must be an integer."),
+    max: z.coerce.number().int("Maximum value must be an integer."),
+    count: z.coerce.number().int().min(1).max(100).default(1),
+    allowDuplicates: z.boolean().default(false),
+  })
+  .refine((data) => data.min < data.max, {
+    message: "Minimum value must be less than the maximum value.",
+    path: ["min"],
+  });
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -43,7 +72,7 @@ interface GeneratedNumber {
 
 export default function RandomNumberGenerator() {
   const [result, setResult] = useState<number[]>([]);
-  const [suggestion, setSuggestion] = useState('');
+  const [suggestion, setSuggestion] = useState("");
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [history, setHistory] = useState<GeneratedNumber[]>([]);
   const { toast } = useToast();
@@ -58,9 +87,9 @@ export default function RandomNumberGenerator() {
     },
   });
 
-  const min = form.watch('min');
-  const max = form.watch('max');
-  const count = form.watch('count');
+  const min = form.watch("min");
+  const max = form.watch("max");
+  const count = form.watch("count");
 
   const getDiceIcon = (index: number) => {
     const diceIcons = [Dice1, Dice2, Dice3, Dice4, Dice5, Dice6];
@@ -69,46 +98,56 @@ export default function RandomNumberGenerator() {
   };
 
   const getPresetRanges = () => [
-    { min: 1, max: 6, label: 'Dice Roll', icon: <Dice1 className="h-4 w-4" /> },
-    { min: 1, max: 10, label: '1-10', icon: <span>🔟</span> },
-    { min: 1, max: 100, label: '1-100', icon: <span>💯</span> },
-    { min: 0, max: 9, label: 'Single Digit', icon: <span>🔢</span> },
-    { min: 100, max: 999, label: '3 Digits', icon: <span>🎰</span> },
-    { min: 1000, max: 9999, label: '4 Digits', icon: <span>📟</span> },
+    { min: 1, max: 6, label: "Dice Roll", icon: <Dice1 className="h-4 w-4" /> },
+    { min: 1, max: 10, label: "1-10", icon: <span>🔟</span> },
+    { min: 1, max: 100, label: "1-100", icon: <span>💯</span> },
+    { min: 0, max: 9, label: "Single Digit", icon: <span>🔢</span> },
+    { min: 100, max: 999, label: "3 Digits", icon: <span>🎰</span> },
+    { min: 1000, max: 9999, label: "4 Digits", icon: <span>📟</span> },
   ];
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     const { min, max, count, allowDuplicates } = data;
-    
+
     const generatedNumbers: number[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       let randomNumber: number;
       do {
         randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-      } while (!allowDuplicates && generatedNumbers.includes(randomNumber) && generatedNumbers.length < (max - min + 1));
-      
+      } while (
+        !allowDuplicates &&
+        generatedNumbers.includes(randomNumber) &&
+        generatedNumbers.length < max - min + 1
+      );
+
       generatedNumbers.push(randomNumber);
-      
+
       // Add to history
-      setHistory(prev => [{ value: randomNumber, timestamp: new Date() }, ...prev.slice(0, 19)]);
+      setHistory((prev) => [
+        { value: randomNumber, timestamp: new Date() },
+        ...prev.slice(0, 19),
+      ]);
     }
-    
+    const rangeObj = { start: min, end: max };
     setResult(generatedNumbers);
 
     setSuggestionLoading(true);
-    setSuggestion('');
+    setSuggestion("");
     try {
-      const res = await suggestNextStep({ 
-        calculatorName: 'Random Number Generator',
-        range: `${min}-${max}`,
+      const res = await suggestNextStep({
+        calculatorName: "Random Number Generator",
+        range: rangeObj, // ✅ object, not string
+        rangeSize: max - min + 1,
         count,
-        numbers: generatedNumbers
+        numbers: generatedNumbers,
       });
       setSuggestion(res.suggestion);
     } catch (error) {
-      console.error('Failed to get AI suggestion:', error);
-      setSuggestion("Use this for games, picking winners, or whenever you need an unbiased choice. Try changing the range for different results!");
+      console.error("Failed to get AI suggestion:", error);
+      setSuggestion(
+        "Use this for games, picking winners, or whenever you need an unbiased choice. Try changing the range for different results!"
+      );
     } finally {
       setSuggestionLoading(false);
     }
@@ -122,24 +161,24 @@ export default function RandomNumberGenerator() {
       allowDuplicates: false,
     });
     setResult([]);
-    setSuggestion('');
+    setSuggestion("");
     setSuggestionLoading(false);
   };
 
   const copyToClipboard = () => {
     if (result.length === 0) return;
-    const text = result.join(', ');
+    const text = result.join(", ");
     navigator.clipboard.writeText(text);
     toast({
-      title: 'Copied!',
+      title: "Copied!",
       description: `${result.length} number(s) copied to clipboard.`,
       duration: 2000,
     });
   };
 
   const applyPreset = (min: number, max: number) => {
-    form.setValue('min', min);
-    form.setValue('max', max);
+    form.setValue("min", min);
+    form.setValue("max", max);
   };
 
   const regenerate = () => {
@@ -227,7 +266,9 @@ export default function RandomNumberGenerator() {
                 {/* Range Slider */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <FormLabel>Range: {min} to {max}</FormLabel>
+                    <FormLabel>
+                      Range: {min} to {max}
+                    </FormLabel>
                     <span className="text-sm text-muted-foreground">
                       {getRangeSize()} possible values
                     </span>
@@ -236,9 +277,9 @@ export default function RandomNumberGenerator() {
                     <span className="text-sm font-medium w-12">{min}</span>
                     <div className="flex-1">
                       <div className="h-2 bg-muted rounded-full relative">
-                        <div 
+                        <div
                           className="h-full bg-primary rounded-full"
-                          style={{ width: '100%' }}
+                          style={{ width: "100%" }}
                         />
                       </div>
                     </div>
@@ -292,10 +333,9 @@ export default function RandomNumberGenerator() {
                             Allow Duplicates
                           </FormLabel>
                           <p className="text-sm text-muted-foreground">
-                            {count > getRangeSize() 
+                            {count > getRangeSize()
                               ? `Cannot disable - range too small for ${count} unique numbers`
-                              : 'Allow same number to appear multiple times'
-                            }
+                              : "Allow same number to appear multiple times"}
                           </p>
                         </div>
                       </FormItem>
@@ -308,15 +348,20 @@ export default function RandomNumberGenerator() {
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-yellow-600" />
                       <p className="text-sm text-yellow-800">
-                        You're generating {count} numbers from a range of only {getRangeSize()} values. 
-                        Some numbers will be duplicated.
+                        You're generating {count} numbers from a range of only{" "}
+                        {getRangeSize()} values. Some numbers will be
+                        duplicated.
                       </p>
                     </div>
                   </div>
                 )}
               </CardContent>
               <CardFooter className="flex gap-4">
-                <Button type="button" variant="outline" onClick={resetCalculator}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={resetCalculator}
+                >
                   Reset
                 </Button>
                 <Button type="submit" className="flex-1">
@@ -352,7 +397,9 @@ export default function RandomNumberGenerator() {
                     key={index}
                     className="text-center p-3 border rounded-lg bg-muted/50"
                   >
-                    <div className="text-lg font-bold text-primary">{item.value}</div>
+                    <div className="text-lg font-bold text-primary">
+                      {item.value}
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       {item.timestamp.toLocaleTimeString()}
                     </div>
@@ -375,12 +422,17 @@ export default function RandomNumberGenerator() {
               <div className="space-y-4">
                 <div className="space-y-3">
                   {result.map((number, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div className="flex items-center gap-2">
                         {getDiceIcon(index)}
                         <span className="font-mono text-sm">#{index + 1}</span>
                       </div>
-                      <span className="text-2xl font-bold text-primary">{number}</span>
+                      <span className="text-2xl font-bold text-primary">
+                        {number}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -388,7 +440,9 @@ export default function RandomNumberGenerator() {
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                   <div>
                     <p className="text-sm text-muted-foreground">Range</p>
-                    <p className="font-semibold">{min} - {max}</p>
+                    <p className="font-semibold">
+                      {min} - {max}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Count</p>
@@ -402,11 +456,18 @@ export default function RandomNumberGenerator() {
                     <p className="text-sm font-medium">Statistics</p>
                   </div>
                   <div className="text-sm text-muted-foreground text-left space-y-1">
-                    <p>• Average: {(result.reduce((a, b) => a + b, 0) / result.length).toFixed(2)}</p>
+                    <p>
+                      • Average:{" "}
+                      {(
+                        result.reduce((a, b) => a + b, 0) / result.length
+                      ).toFixed(2)}
+                    </p>
                     <p>• Min: {Math.min(...result)}</p>
                     <p>• Max: {Math.max(...result)}</p>
                     {result.length > 1 && (
-                      <p>• Unique: {new Set(result).size} / {result.length}</p>
+                      <p>
+                        • Unique: {new Set(result).size} / {result.length}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -428,7 +489,7 @@ export default function RandomNumberGenerator() {
                 </p>
               </div>
             )}
-             
+
             {(suggestion || suggestionLoading) && (
               <div className="pt-6 border-t">
                 <CardHeader className="p-0 mb-2 flex-row items-center gap-2">
@@ -459,40 +520,57 @@ export default function RandomNumberGenerator() {
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="technology">Randomness Technology</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="usage">
             <Accordion type="single" collapsible>
               <AccordionItem value="explanation">
-                <AccordionTrigger>How does random number generation work?</AccordionTrigger>
+                <AccordionTrigger>
+                  How does random number generation work?
+                </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4">
                     <p>
-                      This generator uses JavaScript's Math.random() function to create pseudorandom numbers 
-                      that are uniformly distributed across your specified range.
+                      This generator uses JavaScript's Math.random() function to
+                      create pseudorandom numbers that are uniformly distributed
+                      across your specified range.
                     </p>
-                    
+
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-semibold mb-2">Random Number Formula</h4>
+                        <h4 className="font-semibold mb-2">
+                          Random Number Formula
+                        </h4>
                         <div className="font-mono bg-muted p-4 rounded-md text-sm">
-                          Random = Math.floor(Math.random() * (max - min + 1)) + min
+                          Random = Math.floor(Math.random() * (max - min + 1)) +
+                          min
                         </div>
                         <p className="text-sm text-muted-foreground mt-2">
-                          This ensures every number in your range has an equal probability of being selected
+                          This ensures every number in your range has an equal
+                          probability of being selected
                         </p>
                       </div>
-                      
+
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                          <h4 className="font-semibold mb-2">Pseudorandom vs True Random</h4>
+                          <h4 className="font-semibold mb-2">
+                            Pseudorandom vs True Random
+                          </h4>
                           <div className="text-sm space-y-2">
-                            <p><strong>Pseudorandom:</strong> Algorithmically generated, reproducible with seed</p>
-                            <p><strong>True Random:</strong> Based on physical phenomena, unpredictable</p>
+                            <p>
+                              <strong>Pseudorandom:</strong> Algorithmically
+                              generated, reproducible with seed
+                            </p>
+                            <p>
+                              <strong>True Random:</strong> Based on physical
+                              phenomena, unpredictable
+                            </p>
                           </div>
                         </div>
-                        
+
                         <div>
-                          <h4 className="font-semibold mb-2">Uniform Distribution</h4>
+                          <h4 className="font-semibold mb-2">
+                            Uniform Distribution
+                          </h4>
                           <div className="text-sm space-y-2">
                             <p>• Each number has equal probability</p>
                             <p>• No bias toward any value</p>
@@ -515,37 +593,54 @@ export default function RandomNumberGenerator() {
                   {[
                     {
                       application: "Games & Gambling",
-                      description: "Dice rolls, card shuffling, slot machines, and game mechanics",
-                      examples: "Dice games, lottery numbers, random events"
+                      description:
+                        "Dice rolls, card shuffling, slot machines, and game mechanics",
+                      examples: "Dice games, lottery numbers, random events",
                     },
                     {
                       application: "Statistical Sampling",
-                      description: "Select random samples from populations for research and surveys",
-                      examples: "A/B testing, survey participants, quality control"
+                      description:
+                        "Select random samples from populations for research and surveys",
+                      examples:
+                        "A/B testing, survey participants, quality control",
                     },
                     {
                       application: "Cryptography",
-                      description: "Generate keys, nonces, and salts for security applications",
-                      examples: "Encryption keys, password salts, session tokens"
+                      description:
+                        "Generate keys, nonces, and salts for security applications",
+                      examples:
+                        "Encryption keys, password salts, session tokens",
                     },
                     {
                       application: "Simulations",
-                      description: "Monte Carlo methods and probabilistic modeling",
-                      examples: "Financial modeling, physics simulations, AI training"
+                      description:
+                        "Monte Carlo methods and probabilistic modeling",
+                      examples:
+                        "Financial modeling, physics simulations, AI training",
                     },
                     {
                       application: "Decision Making",
-                      description: "Break ties, assign tasks, or make unbiased choices",
-                      examples: "Raffle winners, task assignment, random selection"
-                    }
+                      description:
+                        "Break ties, assign tasks, or make unbiased choices",
+                      examples:
+                        "Raffle winners, task assignment, random selection",
+                    },
                   ].map((item, index) => (
-                    <div key={index} className="flex items-start gap-4 py-3 border-b">
-                      <Badge variant="outline" className="whitespace-nowrap border-purple-200 bg-purple-50">
+                    <div
+                      key={index}
+                      className="flex items-start gap-4 py-3 border-b"
+                    >
+                      <Badge
+                        variant="outline"
+                        className="whitespace-nowrap border-purple-200 bg-purple-50"
+                      >
                         {item.application}
                       </Badge>
                       <div className="flex-1">
                         <p className="font-medium">{item.description}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{item.examples}</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {item.examples}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -563,20 +658,27 @@ export default function RandomNumberGenerator() {
                 </div>
                 <div className="space-y-4 text-sm">
                   <div className="border rounded-lg p-4">
-                    <h4 className="font-semibold mb-2">Pseudorandom Number Generators (PRNGs)</h4>
+                    <h4 className="font-semibold mb-2">
+                      Pseudorandom Number Generators (PRNGs)
+                    </h4>
                     <p className="text-muted-foreground">
-                      Most computer random number generators are pseudorandom - they use mathematical algorithms 
-                      to produce sequences that appear random. They're fast and reproducible with the same seed, 
-                      making them ideal for simulations and games.
+                      Most computer random number generators are pseudorandom -
+                      they use mathematical algorithms to produce sequences that
+                      appear random. They're fast and reproducible with the same
+                      seed, making them ideal for simulations and games.
                     </p>
                   </div>
-                  
+
                   <div className="border rounded-lg p-4">
-                    <h4 className="font-semibold mb-2">True Random Number Generators (TRNGs)</h4>
+                    <h4 className="font-semibold mb-2">
+                      True Random Number Generators (TRNGs)
+                    </h4>
                     <p className="text-muted-foreground">
-                      True random numbers come from physical phenomena like atmospheric noise, radioactive decay, 
-                      or quantum effects. They're used in cryptography where absolute unpredictability is required, 
-                      but they're slower and more resource-intensive.
+                      True random numbers come from physical phenomena like
+                      atmospheric noise, radioactive decay, or quantum effects.
+                      They're used in cryptography where absolute
+                      unpredictability is required, but they're slower and more
+                      resource-intensive.
                     </p>
                   </div>
 
@@ -586,9 +688,11 @@ export default function RandomNumberGenerator() {
                       <h4 className="font-semibold">Security Considerations</h4>
                     </div>
                     <p className="text-sm">
-                      For cryptographic purposes or security-sensitive applications, always use cryptographically 
-                      secure random number generators. Standard Math.random() is suitable for games, simulations, 
-                      and general-purpose use but should not be used for security-sensitive operations.
+                      For cryptographic purposes or security-sensitive
+                      applications, always use cryptographically secure random
+                      number generators. Standard Math.random() is suitable for
+                      games, simulations, and general-purpose use but should not
+                      be used for security-sensitive operations.
                     </p>
                   </div>
                 </div>
